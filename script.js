@@ -2,6 +2,10 @@ addInitEvent(function () {
     var links = getElementsByClass('qsub__link', document, 'img');
     if (links.length === 0) return;
 
+    function prettyid(ns) {
+        return ns ? (ns + ':*') : '*';
+    }
+
     function onclick() {
         var overlay = $('plugin_qsub_popup');
         if (overlay) overlay.parentNode.removeChild(overlay);
@@ -10,12 +14,13 @@ addInitEvent(function () {
         var s = this.className.match(/qsub__notsubscribed/);
         content.className = 'content';
         if (s) {
-            content.innerHTML = '<p>Das Abo wird eingerichtet …</p>';
+            content.innerHTML = '<p>' + LANG.plugins.quicksubscribe.subscr_in_progress + '</p>';
             var ajax = new doku_ajax('plugin_quicksubscribe_subscribe', {ns: NS + ':'});
         } else {
-            content.innerHTML = '<p>Sie haben diese Seite über den Namespace ' + this.title +  ' abonniert.<br />' +
-                                'Möchten Sie dieses Abo löschen? ' +
-                                '<button class="button">' + 'Löschen' + '</button></p>';
+            content.innerHTML = '<p>' + LANG.plugins.quicksubscribe.is_subscr.replace(/%s/, this.title) +
+                                '<br/>' + LANG.plugins.quicksubscribe.del_subscr +
+                                ' <button class="button">' + LANG.plugins.quicksubscribe.del_subscr_button +
+                                '</button></p>';
             var ajax = new doku_ajax('plugin_quicksubscribe_unsubscribe', {ns: this.ns});
             addEvent(content.lastChild.lastChild, 'click', function () {
                 // late bind!
@@ -23,9 +28,12 @@ addInitEvent(function () {
             });
         }
 
-        ajax.elementObj = content.lastChild;
         var _this = this;
+        var tgt = content.lastChild;
         ajax.onCompletion = function () {
+            tgt.innerHTML = LANG.plugins.quicksubscribe[(s ? 'sub' : 'unsub') +
+                                                        '_' + (this.responseStatus[0] == 200 ?
+                                                        'succ' : 'fail')].replace(/%s/, prettyid(this.ns));
             if (this.responseStatus[0] !== 200) {
                 return;
             }
@@ -34,12 +42,11 @@ addInitEvent(function () {
             if (s) {
                 _this.ns = NS + ':';
             }
-            _this.title     = (s ? (NS ? (NS + ':*') : '*') : 'Änderungen abonnieren');
+            _this.title     = s ? prettyid(NS) : LANG.plugins.quicksubscribe.subscribe;
         };
         if (s) ajax.runAJAX();
 
-        // FIXME lang
-        plugin_qsub__createOverlay('Abo', content, this);
+        plugin_qsub__createOverlay(LANG.plugins.quicksubscribe.title, content, this);
         return false;
     }
 
@@ -62,8 +69,10 @@ function plugin_qsub__createOverlay(title, content, button) {
 
     content.appendChild(document.createElement('hr'));
     var more = document.createElement('p');
-    more.innerHTML = 'Möchten Sie Ihre Abo-Einstellungen bearbeiten?' +
-                     '<button class="button">' + 'Einstellungen' + '</button>';
+    more.innerHTML = LANG.plugins.quicksubscribe.edit_subscr +
+                     ' <button class="button">' + LANG.plugins.quicksubscribe.edit_subscr_button +
+                     '</button>';
+
     addEvent(more.lastChild, 'click', function () {document.location = button.href});
     content.appendChild(more);
     div.appendChild(content);

@@ -15,7 +15,8 @@ class helper_plugin_quicksubscribe extends DokuWiki_Plugin {
             $title = $lang['btn_subscribe'];
         }
         $sub = '<img class="qsub__link ' .
-               ($INFO['subscribed'] ? 'qsub__subscribed' : 'qsub__notsubscribed') .
+               ($INFO['subscribed'] ? ('qsubns__' . $INFO['subscribed'][0]['target'] .
+                                       ' qsub__subscribed') : 'qsub__notsubscribed') .
                '" src="'.DOKU_BASE.'lib/plugins/quicksubscribe/images/mail-' . $img .
                '.png" width="16" height="16" alt="" title="'.$title.'" />';
         tpl_actionlink('subscribe','','',$sub);
