@@ -1,0 +1,49 @@
+.qsub__link {
+    width: 16px;
+    height: 16px;
+}
+
+.qsub__subscribed {
+    background: transparent url(images/mail-yes.png);
+}
+
+.qsub__notsubscribed {
+    background: transparent url(images/mail-no.png);
+}
+
+div.dokuwiki div#plugin_qsub_popup {
+    position:absolute;
+    background-color: __background__;
+    border:1px solid __border__;
+    width:400px;
+}
+
+div.dokuwiki div#plugin_qsub_popup .title {
+    background-color: __background_alt__;
+    text-align:center;
+}
+
+div.dokuwiki div#plugin_qsub_popup .title img {
+    float:right;
+    cursor:pointer;
+}
+
+div.dokuwiki div#plugin_qsub_popup .title {
+    height: 16px;
+    margin-bottom: 5px;
+}
+
+div.dokuwiki div#plugin_qsub_popup div.content {
+    font-size: 1.2em;
+    padding: 6px;
+}
+
+div.dokuwiki div#plugin_qsub_popup div.content p {
+    padding: 4px;
+}
+
+div.dokuwiki div#plugin_qsub_popup hr {
+    background-color: __border__;
+    border: none;
+    height: 1px;
+}
