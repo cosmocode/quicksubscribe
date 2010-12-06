@@ -6,7 +6,10 @@ addInitEvent(function () {
         return ns ? (ns + ':*') : '*';
     }
 
-    function onclick() {
+    function onclick(e) {
+        // IE fix, dunno
+        e.preventDefault();
+
         var overlay = $('plugin_qsub_popup');
         if (overlay) overlay.parentNode.removeChild(overlay);
 
