@@ -16,6 +16,7 @@ div.dokuwiki div#plugin_qsub_popup {
     background-color: __background__;
     border:1px solid __border__;
     width:400px;
+    z-index: 43;
 }
 
 div.dokuwiki div#plugin_qsub_popup .title {
