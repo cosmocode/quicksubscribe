@@ -1,0 +1,7 @@
+base	 quicksubscribe
+author	 Adrian Lang
+email	 mail@adrianlang.de
+date	 2010-12-06
+name	 Quicksubscribe Plugin
+desc	 Provides a simpler interface to page subscriptions.
+url	 http://ickewiki.de/dokumentation/quicksubscribe
