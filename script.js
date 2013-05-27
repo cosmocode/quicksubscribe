@@ -1,98 +1,122 @@
-addInitEvent(function () {
-    var links = getElementsByClass('qsub__link', document, 'img');
-    if (links.length === 0) return;
+jQuery(function () {
+    var $links = jQuery('img.qsub__link');
+    if (!$links.length) return;
 
-    function prettyid(ns) {
-        return ns ? (ns + ':*') : '*';
+    /**
+     * Add additional stuff to the dialog
+     *
+     * @param $to {object} jQuery dialog object
+     * @param href {string}
+     */
+    function addmore($to, href) {
+        var $more = jQuery(document.createElement('div'));
+        $more.addClass('more');
+        $more.html(
+                '<p>' + LANG.plugins.quicksubscribe.edit_subscr +
+                    '<button class="button">' + LANG.plugins.quicksubscribe.edit_subscr_button +
+                    '</button></p>'
+            ).find('button').click(function () {
+                document.location = href;
+            });
+
+        $to.append($more);
     }
 
-    function onclick(e) {
-        // IE fix, dunno
-        e.preventDefault();
+    /**
+     * Handles the whole click processing
+     *
+     * @param e
+     * @returns {boolean}
+     */
+    function clickhandler(e) {
+        // remove any existing popup
+        jQuery('#plugin_qsub__popup').remove();
 
-        var overlay = $('plugin_qsub_popup');
-        if (overlay) overlay.parentNode.removeChild(overlay);
+        // create a new popup
+        var $overlay = jQuery(document.createElement('div'));
+        $overlay.attr({
+            id: 'plugin_qsub__popup',
+            title: LANG.plugins.quicksubscribe.title
+        });
 
-        var content = document.createElement('div');
-        var s = this.className.match(/qsub__notsubscribed/);
-        content.className = 'content';
-        if (s) {
-            content.innerHTML = '<p>' + LANG.plugins.quicksubscribe.subscr_in_progress + '</p>';
-            var ajax = new doku_ajax('plugin_quicksubscribe_subscribe', {ns: NS + ':'});
+        var $link = jQuery(this);
+
+        if (jQuery(this).hasClass('qsub__notsubscribed')) {
+            // Handle Subscriptions
+
+            $overlay.html(
+                    '<p>' + LANG.plugins.quicksubscribe.subscr_in_progress + '</p>'
+                ).load(
+                DOKU_BASE + 'lib/exe/ajax.php',
+                {
+                    call: 'plugin_quicksubscribe',
+                    ns: JSINFO.namespace + ':',
+                    do: 'subscribe'
+                },
+                function (text, status) {
+                    if (status == 'success') {
+                        $link.addClass('qsub__subscribed');
+                        $link.removeClass('qsub__notsubscribed');
+                    }
+                    addmore($overlay, $link.attr('href'));
+                }
+            );
         } else {
-            content.innerHTML = '<p>' + LANG.plugins.quicksubscribe.is_subscr.replace(/%s/, this.title) +
-                                '<br/>' + LANG.plugins.quicksubscribe.del_subscr +
-                                ' <button class="button">' + LANG.plugins.quicksubscribe.del_subscr_button +
-                                '</button></p>';
-            var ajax = new doku_ajax('plugin_quicksubscribe_unsubscribe', {ns: this.ns});
-            addEvent(content.lastChild.lastChild, 'click', function () {
-                // late bind!
-                ajax.runAJAX();
-            });
+            // Handle unsubscriptions
+
+            $overlay.html(
+                    '<p>' + LANG.plugins.quicksubscribe.is_subscr.replace(/%s/, this.title) +
+                        ' ' + LANG.plugins.quicksubscribe.del_subscr +
+                        '<button class="button">' +
+                        LANG.plugins.quicksubscribe.del_subscr_button +
+                        '</button>' + '</p>'
+                ).find('button').click(function () {
+                    $overlay.load(
+                        DOKU_BASE + 'lib/exe/ajax.php',
+                        {
+                            call: 'plugin_quicksubscribe',
+                            ns: $link.attr('data-ns'),
+                            do: 'unsubscribe'
+                        },
+                        function (text, status) {
+                            if (status == 'success') {
+                                $link.removeClass('qsub__subscribed');
+                                $link.addClass('qsub__notsubscribed');
+                            }
+                            addmore($overlay, $link.attr('href'));
+                        }
+                    );
+                });
+            addmore($overlay, $link.attr('href'));
         }
 
-        var _this = this;
-        var tgt = content.lastChild;
-        ajax.onCompletion = function () {
-            tgt.innerHTML = LANG.plugins.quicksubscribe[(s ? 'sub' : 'unsub') +
-                                                        '_' + (this.responseStatus[0] == 200 ?
-                                                        'succ' : 'fail')].replace(/%s/, prettyid(this.ns));
-            if (this.responseStatus[0] !== 200) {
-                return;
-            }
-            _this.className = _this.className.replace(/qsub__(not)?subscribed/g, '') +
-                              (s ? 'qsub__subscribed' : 'qsub__notsubscribed');
-            if (s) {
-                _this.ns = NS + ':';
-            }
-            _this.title     = s ? prettyid(NS) : LANG.plugins.quicksubscribe.subscribe;
-        };
-        if (s) ajax.runAJAX();
-
-        plugin_qsub__createOverlay(LANG.plugins.quicksubscribe.title, content, this);
+        // show the dialog
+        $overlay.dialog();
+        e.preventDefault();
+        e.stopPropagation();
         return false;
     }
 
-    for (var i = 0 ; i < links.length ; ++i) {
-        var link = links[i].parentNode;
-        link.className += ' ' + links[i].className;
-        link.ns = link.className.match(/qsubns__([^ ]+)/);
-        link.ns = link.ns ? link.ns[1] : (NS + ':');
-        link.title = links[i].title;
-        link.innerHTML = ' ';
-        addEvent(link, 'click', onclick);
-    }
+    // attach dialog creation to any quicksubscribe link
+    $links.each(function () {
+        var $img = jQuery(this);
+        var $link = $img.parent();
+
+        // copy attributes to surrounding link, then remove the inner image
+        $link.addClass($img.attr('class'));
+        $link.attr('title', $img.attr('title'));
+        $img.remove();
+
+        // attach namespace info to link
+        var ns = $link.attr('class').match(/qsubns__([^ ]+)/);
+        if (ns){
+            ns = ns[1];
+        }else{
+            ns = JSINFO.namespace + ':';
+        }
+        $link.attr('data-ns', ns);
+
+        // attach click handler
+        $link.click(clickhandler);
+    });
 });
-
-function plugin_qsub__createOverlay(title, content, button) {
-    var div = document.createElement('div');
-    div.innerHTML = '<div class="title">' +
-                    '<img src="' + DOKU_BASE + 'lib/images/close.png">' +
-                    title + '</div>';
-
-    content.appendChild(document.createElement('hr'));
-    var more = document.createElement('p');
-    more.innerHTML = LANG.plugins.quicksubscribe.edit_subscr +
-                     ' <button class="button">' + LANG.plugins.quicksubscribe.edit_subscr_button +
-                     '</button>';
-
-    addEvent(more.lastChild, 'click', function () {document.location = button.href});
-    content.appendChild(more);
-    div.appendChild(content);
-
-    div.id = 'plugin_qsub_popup';
-
-    div.__close = function(event) {
-        div.style.display = 'none';
-    };
-
-    addEvent(div.firstChild.firstChild,'click',div.__close);
-
-    drag.attach(div, div.firstChild);
-    var dw = getElementsByClass('dokuwiki', document.body, 'div')[0];
-    dw.appendChild(div);
-    // FIXME
-    div.style.top  = '300px';
-    div.style.left = '500px';
-    return div;
-}
