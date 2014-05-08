@@ -51,7 +51,7 @@ jQuery(function () {
                 {
                     call: 'plugin_quicksubscribe',
                     ns: JSINFO.namespace + ':',
-                    do: 'subscribe'
+                    'do': 'subscribe'
                 },
                 function (text, status) {
                     if (status == 'success') {
@@ -76,7 +76,7 @@ jQuery(function () {
                         {
                             call: 'plugin_quicksubscribe',
                             ns: $link.attr('data-ns'),
-                            do: 'unsubscribe'
+                            'do': 'unsubscribe'
                         },
                         function (text, status) {
                             if (status == 'success') {
