@@ -11,7 +11,7 @@ if(!defined('DOKU_INC')) die();
 
 class action_plugin_quicksubscribe extends DokuWiki_Action_Plugin {
 
-    function register(&$controller) {
+    function register(Doku_Event_Handler $controller) {
         $controller->register_hook('AJAX_CALL_UNKNOWN', 'BEFORE', $this, 'handle_ajax_call_unknown');
     }
 
