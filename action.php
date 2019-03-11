@@ -6,17 +6,23 @@
  * @author  Andreas Gohr <gohr@cosmocode.de>
  */
 
-// must be run within Dokuwiki
-if(!defined('DOKU_INC')) die();
-
-class action_plugin_quicksubscribe extends DokuWiki_Action_Plugin {
-
-    function register(Doku_Event_Handler $controller) {
+class action_plugin_quicksubscribe extends DokuWiki_Action_Plugin
+{
+    /** @inheritdoc */
+    function register(Doku_Event_Handler $controller)
+    {
         $controller->register_hook('AJAX_CALL_UNKNOWN', 'BEFORE', $this, 'handle_ajax_call_unknown');
     }
 
-    function handle_ajax_call_unknown(&$event, $param) {
-        if($event->data != 'plugin_quicksubscribe') return;
+    /**
+     * Handle subscription/unsubscription AJAX events
+     *
+     * @param Doku_Event $event
+     * @param $param
+     */
+    function handle_ajax_call_unknown(Doku_Event $event, $param)
+    {
+        if ($event->data != 'plugin_quicksubscribe') return;
         $event->preventDefault();
         $event->stopPropagation();
 
@@ -30,32 +36,29 @@ class action_plugin_quicksubscribe extends DokuWiki_Action_Plugin {
 
         $sub = new Subscription();
 
-        if($do == 'subscribe') {
+        if ($do == 'subscribe') {
             // new subscriptions
-            $ok = $sub->add($ns, $_SERVER['REMOTE_USER'], 'list');
-            if($ok) {
-                $msg = sprintf($this->getLang('sub_succ'), $this->prettyid($ns));
-            } else {
-                $msg = sprintf($this->getLang('sub_fail'), $this->prettyid($ns));
+            try {
+                $ok = $sub->add($ns, $_SERVER['REMOTE_USER'], 'list');
+            } catch (\Exception $ignored) {
+                $ok = false;
             }
-        } elseif($do == 'unsubscribe') {
+            if ($ok) {
+                $msg = sprintf($this->getLang('sub_succ'), prettyprint_id($ns));
+            } else {
+                $msg = sprintf($this->getLang('sub_fail'), prettyprint_id($ns));
+            }
+        } elseif ($do == 'unsubscribe') {
             // subscription removal
             $ok = $sub->remove($ns, $_SERVER['REMOTE_USER']);
-            if($ok) {
-                $msg = sprintf($this->getLang('unsub_succ'), $this->prettyid($ns));
+            if ($ok) {
+                $msg = sprintf($this->getLang('unsub_succ'), prettyprint_id($ns));
             } else {
-                $msg = sprintf($this->getLang('unsub_fail'), $this->prettyid($ns));
+                $msg = sprintf($this->getLang('unsub_fail'), prettyprint_id($ns));
             }
         }
 
-        if(!$ok) http_status(400);
+        if (!$ok) http_status(400);
         echo '<p>' . $msg . '</p>';
     }
-
-    private function prettyid($ns) {
-        $ns = cleanID($ns);
-        return $ns ? ($ns . ':*') : '*';
-    }
 }
-
-// vim:ts=4:sw=4:et:enc=utf-8:
