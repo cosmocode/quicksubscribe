@@ -57,6 +57,7 @@ jQuery(function () {
                         $link.addClass('plugin_qsub_subscribed');
                         $link.removeClass('plugin_qsub_notsubscribed');
                         $link.data('target', JSINFO.namespace + ':');
+                        $link.attr('title', LANG.plugins.quicksubscribe.unsubscribe);
                     }
                     addmore($overlay, $link.attr('href'));
                 }
@@ -82,6 +83,7 @@ jQuery(function () {
                             $link.data('target', '');
                             $link.removeClass('plugin_qsub_subscribed');
                             $link.addClass('plugin_qsub_notsubscribed');
+                            $link.attr('title', LANG.plugins.quicksubscribe.subscribe);
                         }
                         addmore($overlay, $link.attr('href'));
                     }

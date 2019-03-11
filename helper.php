@@ -22,12 +22,15 @@ class helper_plugin_quicksubscribe extends DokuWiki_Plugin
             return '';
         }
 
+        // we need to access the javascript translations
+        $this->setupLocale();
+
         if ($INFO['subscribed']) {
-            $title = prettyprint_id($INFO['subscribed'][0]['target']);
+            $title = $this->lang['js']['unsubscribe'];
             $target = $INFO['subscribed'][0]['target'];
             $class = 'plugin_qsub_subscribed';
         } else {
-            $title = $submgr->getTitle();
+            $title = $this->lang['js']['subscribe'];
             $target = '';
             $class = 'plugin_qsub_notsubscribed';
         }

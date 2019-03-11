@@ -14,3 +14,4 @@ $lang['js']['del_subscr_button']  = 'Löschen';
 $lang['js']['edit_subscr']        = 'Möchten Sie Ihre Abo-Einstellungen bearbeiten?';
 $lang['js']['edit_subscr_button'] = 'Bearbeiten';
 $lang['js']['subscribe']          = 'Änderungen abonnieren';
+$lang['js']['subscribe']          = 'Abo löschen';

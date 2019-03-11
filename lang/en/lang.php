@@ -14,3 +14,4 @@ $lang['js']['del_subscr_button']  = 'Delete';
 $lang['js']['edit_subscr']        = 'Do want to manage your subscription settings?';
 $lang['js']['edit_subscr_button'] = 'Edit';
 $lang['js']['subscribe']          = 'Subscribe to changes';
+$lang['js']['unsubscribe']        = 'Unubscribe from changes';
