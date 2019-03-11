@@ -1,24 +1,46 @@
 <?php
 
-if (!defined('DOKU_INC')) die();
-
-class helper_plugin_quicksubscribe extends DokuWiki_Plugin {
-
-    function tpl_subscribe() {
+class helper_plugin_quicksubscribe extends DokuWiki_Plugin
+{
+    /**
+     * Returns the quick subscribe icon using an inline SVG
+     *
+     * @return string
+     */
+    function tpl_subscribe()
+    {
         global $INFO;
-        if($INFO['subscribed']){
-            $img = 'yes';
-            $title = prettyprint_id($INFO['subscribed'][0]['target']);
-        }else{
-            global $lang;
-            $img = 'no';
-            $title = $lang['btn_subscribe'];
+        global $ACT;
+
+        // only on show
+        if($ACT !== 'show') return '';
+
+        // check if subscription is available
+        try {
+            $submgr = new \dokuwiki\Menu\Item\Subscribe();
+        } catch (\RuntimeException $ignored) {
+            return '';
         }
-        $sub = '<img class="qsub__link ' .
-               ($INFO['subscribed'] ? ('qsubns__' . $INFO['subscribed'][0]['target'] .
-                                       ' qsub__subscribed') : 'qsub__notsubscribed') .
-               '" src="'.DOKU_BASE.'lib/plugins/quicksubscribe/images/mail-' . $img .
-               '.png" width="16" height="16" alt="" title="'.$title.'" />';
-        tpl_actionlink('subscribe','','',$sub);
+
+        if ($INFO['subscribed']) {
+            $title = prettyprint_id($INFO['subscribed'][0]['target']);
+            $target = $INFO['subscribed'][0]['target'];
+            $class = 'plugin_qsub_subscribed';
+        } else {
+            $title = $submgr->getTitle();
+            $target = '';
+            $class = 'plugin_qsub_notsubscribed';
+        }
+
+        // we hide one of the SVGs based on the outer class
+        $svg = inlineSVG(__DIR__ . '/images/bell-ring.svg').inlineSVG(__DIR__ . '/images/bell-outline.svg');
+
+        $link = $submgr->getLinkAttributes('plugin_qsub_');
+        $link['data-target'] = $target;
+        $link['title'] = $title;
+        $link['class'] .= ' ' . $class;
+        $attr = buildAttributes($link);
+
+        return "<a $attr>$svg</a>";
     }
 }

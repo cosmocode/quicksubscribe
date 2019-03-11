@@ -1,5 +1,5 @@
 jQuery(function () {
-    var $links = jQuery('img.qsub__link');
+    var $links = jQuery('a.plugin_qsub_subscribe');
     if (!$links.length) return;
 
     /**
@@ -12,12 +12,12 @@ jQuery(function () {
         var $more = jQuery(document.createElement('div'));
         $more.addClass('more');
         $more.html(
-                '<p>' + LANG.plugins.quicksubscribe.edit_subscr +
-                    '<button class="button">' + LANG.plugins.quicksubscribe.edit_subscr_button +
-                    '</button></p>'
-            ).find('button').click(function () {
-                document.location = href;
-            });
+            '<p>' + LANG.plugins.quicksubscribe.edit_subscr +
+            '<button class="button">' + LANG.plugins.quicksubscribe.edit_subscr_button +
+            '</button></p>'
+        ).find('button').click(function () {
+            document.location = href;
+        });
 
         $to.append($more);
     }
@@ -41,12 +41,11 @@ jQuery(function () {
 
         var $link = jQuery(this);
 
-        if (jQuery(this).hasClass('qsub__notsubscribed')) {
+        if (jQuery(this).hasClass('plugin_qsub_notsubscribed')) {
             // Handle Subscriptions
-
             $overlay.html(
-                    '<p>' + LANG.plugins.quicksubscribe.subscr_in_progress + '</p>'
-                ).load(
+                '<p>' + LANG.plugins.quicksubscribe.subscr_in_progress + '</p>'
+            ).load(
                 DOKU_BASE + 'lib/exe/ajax.php',
                 {
                     call: 'plugin_quicksubscribe',
@@ -54,39 +53,40 @@ jQuery(function () {
                     'do': 'subscribe'
                 },
                 function (text, status) {
-                    if (status == 'success') {
-                        $link.addClass('qsub__subscribed');
-                        $link.removeClass('qsub__notsubscribed');
+                    if (status === 'success') {
+                        $link.addClass('plugin_qsub_subscribed');
+                        $link.removeClass('plugin_qsub_notsubscribed');
+                        $link.data('target', JSINFO.namespace + ':');
                     }
                     addmore($overlay, $link.attr('href'));
                 }
             );
         } else {
             // Handle unsubscriptions
-
             $overlay.html(
-                    '<p>' + LANG.plugins.quicksubscribe.is_subscr.replace(/%s/, this.title) +
-                        ' ' + LANG.plugins.quicksubscribe.del_subscr +
-                        '<button class="button">' +
-                        LANG.plugins.quicksubscribe.del_subscr_button +
-                        '</button>' + '</p>'
-                ).find('button').click(function () {
-                    $overlay.load(
-                        DOKU_BASE + 'lib/exe/ajax.php',
-                        {
-                            call: 'plugin_quicksubscribe',
-                            ns: $link.attr('data-ns'),
-                            'do': 'unsubscribe'
-                        },
-                        function (text, status) {
-                            if (status == 'success') {
-                                $link.removeClass('qsub__subscribed');
-                                $link.addClass('qsub__notsubscribed');
-                            }
-                            addmore($overlay, $link.attr('href'));
+                '<p>' + LANG.plugins.quicksubscribe.is_subscr.replace(/%s/, $link.data('target')) +
+                ' ' + LANG.plugins.quicksubscribe.del_subscr +
+                '<button class="button">' +
+                LANG.plugins.quicksubscribe.del_subscr_button +
+                '</button>' + '</p>'
+            ).find('button').click(function () {
+                $overlay.load(
+                    DOKU_BASE + 'lib/exe/ajax.php',
+                    {
+                        call: 'plugin_quicksubscribe',
+                        ns: $link.data('target'),
+                        'do': 'unsubscribe'
+                    },
+                    function (text, status) {
+                        if (status === 'success') {
+                            $link.data('target', '');
+                            $link.removeClass('plugin_qsub_subscribed');
+                            $link.addClass('plugin_qsub_notsubscribed');
                         }
-                    );
-                });
+                        addmore($overlay, $link.attr('href'));
+                    }
+                );
+            });
             addmore($overlay, $link.attr('href'));
         }
 
@@ -99,23 +99,7 @@ jQuery(function () {
 
     // attach dialog creation to any quicksubscribe link
     $links.each(function () {
-        var $img = jQuery(this);
-        var $link = $img.parent();
-
-        // copy attributes to surrounding link, then remove the inner image
-        $link.addClass($img.attr('class'));
-        $link.attr('title', $img.attr('title'));
-        $img.remove();
-
-        // attach namespace info to link
-        var ns = $link.attr('class').match(/qsubns__([^ ]+)/);
-        if (ns){
-            ns = ns[1];
-        }else{
-            ns = JSINFO.namespace + ':';
-        }
-        $link.attr('data-ns', ns);
-
+        var $link = jQuery(this);
         // attach click handler
         $link.click(clickhandler);
     });

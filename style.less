@@ -1,0 +1,37 @@
+a.plugin_qsub_subscribe {
+    svg {
+        fill: @ini_link;
+        height: 1.6em;
+        width: 1.6em;
+        display: none;
+    }
+
+    &.plugin_qsub_subscribed {
+        svg:first-of-type {
+            display: block;
+        }
+    }
+
+    &.plugin_qsub_notsubscribed {
+        svg:last-of-type {
+            display: block;
+        }
+    }
+}
+
+
+#plugin_qsub__popup {
+    p {
+        font-size: 14px;
+        padding: 0.5em 0.3em;
+    }
+
+    .more {
+        border-top: 1px solid @ini_border;
+    }
+
+    button {
+        display: block;
+        margin: 0.5em auto;
+    }
+}
