@@ -1,7 +1,7 @@
 base     quicksubscribe
 author   Adrian Lang
 email    dokuwiki@cosmocode.de
-date     2019-04-11
+date     2023-09-12
 name     Quicksubscribe Plugin
 desc     Provides a simpler interface to page subscriptions.
 url      http://ickewiki.de/dokumentation/quicksubscribe
