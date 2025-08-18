@@ -1,23 +1,26 @@
 <?php
 
-class helper_plugin_quicksubscribe extends DokuWiki_Plugin
+use dokuwiki\Extension\Plugin;
+use dokuwiki\Menu\Item\Subscribe;
+
+class helper_plugin_quicksubscribe extends Plugin
 {
     /**
      * Returns the quick subscribe icon using an inline SVG
      *
      * @return string
      */
-    function tpl_subscribe()
+    public function tpl_subscribe()
     {
         global $INFO;
         global $ACT;
 
         // only on show
-        if($ACT !== 'show') return '';
+        if ($ACT !== 'show') return '';
 
         // check if subscription is available
         try {
-            $submgr = new \dokuwiki\Menu\Item\Subscribe();
+            $submgr = new Subscribe();
         } catch (\RuntimeException $ignored) {
             return '';
         }
@@ -36,7 +39,7 @@ class helper_plugin_quicksubscribe extends DokuWiki_Plugin
         }
 
         // we hide one of the SVGs based on the outer class
-        $svg = inlineSVG(__DIR__ . '/images/bell-ring.svg').inlineSVG(__DIR__ . '/images/bell-outline.svg');
+        $svg = inlineSVG(__DIR__ . '/images/bell-ring.svg') . inlineSVG(__DIR__ . '/images/bell-outline.svg');
 
         $link = $submgr->getLinkAttributes('plugin_qsub_');
         $link['data-target'] = $target;

@@ -1,15 +1,20 @@
 <?php
+
+use dokuwiki\Extension\ActionPlugin;
+use dokuwiki\Extension\EventHandler;
+use dokuwiki\Extension\Event;
+use dokuwiki\Subscriptions\SubscriberManager;
+
 /**
  * DokuWiki Plugin quicksubscribe (Action Component)
  *
  * @license GPL 2 http://www.gnu.org/licenses/gpl-2.0.html
  * @author  Andreas Gohr <gohr@cosmocode.de>
  */
-
-class action_plugin_quicksubscribe extends DokuWiki_Action_Plugin
+class action_plugin_quicksubscribe extends ActionPlugin
 {
     /** @inheritdoc */
-    function register(Doku_Event_Handler $controller)
+    public function register(EventHandler $controller)
     {
         $controller->register_hook('AJAX_CALL_UNKNOWN', 'BEFORE', $this, 'handle_ajax_call_unknown');
     }
@@ -17,10 +22,10 @@ class action_plugin_quicksubscribe extends DokuWiki_Action_Plugin
     /**
      * Handle subscription/unsubscription AJAX events
      *
-     * @param Doku_Event $event
+     * @param Event $event
      * @param $param
      */
-    function handle_ajax_call_unknown(Doku_Event $event, $param)
+    public function handle_ajax_call_unknown(Event $event, $param)
     {
         if ($event->data != 'plugin_quicksubscribe') return;
         $event->preventDefault();
@@ -34,7 +39,7 @@ class action_plugin_quicksubscribe extends DokuWiki_Action_Plugin
         $ok = false;
         $msg = '';
 
-        $sub = new Subscription();
+        $sub = new SubscriberManager();
 
         if ($do == 'subscribe') {
             // new subscriptions
